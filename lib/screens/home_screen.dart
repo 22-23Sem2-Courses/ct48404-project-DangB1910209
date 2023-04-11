@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_note/components/drawer_bar.dart';
+import 'package:my_note/screens/note_detail_screen.dart';
 import 'package:my_note/widgets/backgroud_home.dart';
 
 class MyHomePage extends StatelessWidget {
@@ -27,71 +29,78 @@ class MyHomePage extends StatelessWidget {
               ),
             ),
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collectionGroup('notes')
-                  .snapshots(),
-              builder: (context, AsyncSnapshot snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                }
-                if (!snapshot.hasData) {
-                  return const Center(child: Text('Không có ghi chú nào'));
-                } else {
-                  return Row(
-                    children: List.generate(
-                      snapshot.data!.docs.length,
-                      (index) => Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: SizedBox(
-                          width: 160,
-                          height: 240,
-                          child: Card(
-                            child: InkWell(
-                              onTap: () {},
-                              child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: const [
-                                      Text(
-                                        'note.title',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+          Container(
+            margin: const EdgeInsets.only(left: 8.0),
+            height: 200.0,
+            child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collectionGroup('notes')
+                    .snapshots(),
+                builder: (context, AsyncSnapshot snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(child: Text('Không có ghi chú nào'));
+                  }
+                  final notes = snapshot.data!.docs;
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: notes.length,
+                    itemBuilder: (context, index) {
+                      final createdAt = DateTime.fromMillisecondsSinceEpoch(
+                          notes[index]['createdAt'].millisecondsSinceEpoch);
+                      final createdAtFormatted =
+                          DateFormat('dd/MM/yyyy').format(createdAt);
+                      return Container(
+                        margin: const EdgeInsets.only(right: 2.0),
+                        width: 160.0,
+                        child: Card(
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NoteDetailPage(id: '1'),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${notes[index]['title']}',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                      SizedBox(height: 10),
-                                      Expanded(
-                                        child: Text(
-                                          'content',
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 5,
-                                        ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Expanded(
+                                      child: Text(
+                                        '${notes[index]['content']}',
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 5,
                                       ),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        '16/2',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                        ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      createdAtFormatted,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
                                       ),
-                                    ],
-                                  )),
-                            ),
+                                    ),
+                                  ],
+                                )),
                           ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   );
-                }
-              },
-            )),
+                }),
           ),
         ],
       ),
