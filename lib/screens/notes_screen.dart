@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:my_note/components/sort_option.dart';
 import 'package:my_note/models/note_model.dart';
@@ -99,55 +101,82 @@ class _NotePageState extends State<NotePage> {
                 ],
               ),
               Expanded(
-                  child: ListView.builder(
-                      padding: const EdgeInsets.all(8),
-                      itemCount: notes.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Card(
-                          child: InkWell(
-                            onTap: () {
-                              // Chuyển sang trang chi tiết khi click vào card
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => NoteDetailPage(id: '1'),
-                                ),
-                              );
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ListTile(
-                                  title: Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 2.0, bottom: 4.0),
-                                      child: Text(
-                                        '${notes[index].title}',
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500),
-                                      )),
-                                  subtitle: Text(
-                                    '${notes[index].content}',
-                                    maxLines: 4,
-                                    overflow: TextOverflow.ellipsis,
+                  child: StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection("notes")
+                          .snapshots(),
+                      builder: (context, AsyncSnapshot snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+                        if (!snapshot.hasData) {
+                          return const Center(
+                              child: Text('Không có ghi chú nào'));
+                        } else {
+                          final notes = snapshot.data!.docs;
+                          return ListView.builder(
+                              padding: const EdgeInsets.all(8),
+                              itemCount: snapshot.data!.docs.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final createdAt =
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                        notes[index]['createdAt']
+                                            .millisecondsSinceEpoch);
+                                final createdAtFormatted =
+                                    DateFormat('dd/MM/yyyy').format(createdAt);
+                                return Card(
+                                  child: InkWell(
+                                    onTap: () {
+                                      // Chuyển sang trang chi tiết khi click vào card
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              NoteDetailPage(id: '1'),
+                                        ),
+                                      );
+                                    },
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        ListTile(
+                                          title: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 2.0, bottom: 4.0),
+                                              child: Text(
+                                                '${notes[index]['title']}',
+                                                style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              )),
+                                          subtitle: Text(
+                                            '${notes[index]['content']}',
+                                            maxLines: 4,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 8),
+                                          child: Text(
+                                            '${createdAtFormatted}',
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w300),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  child: Text(
-                                    'Hôm qua',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w300),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }))
+                                );
+                              });
+                        }
+
+                        return Text('No data');
+                      })),
             ],
           )),
     );

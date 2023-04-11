@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_note/main.dart';
+import 'package:my_note/screens/home_screen.dart';
 import '../screens/notes_screen.dart';
 
 class DrawerBar extends StatelessWidget {
