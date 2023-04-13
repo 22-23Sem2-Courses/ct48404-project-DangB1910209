@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_note/models/note_model.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   final NoteModel note;
@@ -20,7 +21,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     super.initState();
     _titleController = TextEditingController(text: widget.note.title);
     _contentController = TextEditingController(text: widget.note.content);
-    _important = widget.note.important;
+    _important = widget.note.important ?? false;
   }
 
   @override
@@ -85,12 +86,22 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
           // Lưu các thay đổi vào widget.note và đóng màn hình
           widget.note.title = _titleController.text;
           widget.note.content = _contentController.text;
           widget.note.important = _important;
-          Navigator.of(context).pop();
+          await NoteModel().updateNote(
+            widget.note.id as String,
+            widget.note.title as String,
+            widget.note.content as String,
+            widget.note.important as bool,
+          );
+          const snackBar = SnackBar(
+            content: Text('Lưu ghi chú thành công'),
+          );
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
         },
         child: const Icon(Icons.save),
       ),

@@ -1,10 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:my_note/components/sort_option.dart';
 import 'package:my_note/models/note_model.dart';
-import 'package:my_note/screens/note_detail_screen.dart';
 import '../components/drawer_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:my_note/screens/note_detail_screen.dart';
 
 class NotePage extends StatefulWidget {
   @override
@@ -15,158 +14,202 @@ class NotePage extends StatefulWidget {
 class _NotePageState extends State<NotePage> {
   @override
   Widget build(BuildContext context) {
-    bool isSortExpanded = false;
-
-    void _showMenu() {
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.sort),
-                  title: const Text('Sắp xếp'),
-                  onTap: () {
-                    // Xử lý khi người dùng chọn mục chia sẻ
-                    setState(() {
-                      isSortExpanded = !isSortExpanded;
-                    });
-                  },
-                ),
-                if (isSortExpanded) const SortOptions(),
-                ListTile(
-                  leading: const Icon(Icons.filter_alt),
-                  title: const Text('Lọc'),
-                  onTap: () {},
-                ),
-              ],
-            );
-          });
-        },
-      );
-    }
-
+    final notes = context
+        .watch<NoteModel>()
+        .notes
+        .where((note) => note['isDelete'] == false)
+        .toList();
+    notes.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
+    TextEditingController _controller = TextEditingController();
     return Scaffold(
-      drawer: DrawerBar(),
-      appBar: AppBar(title: const Text('Ghi chú'), actions: [
-        IconButton(
-            onPressed: () {
-              _showMenu();
-            },
-            icon: const Icon(Icons.more_horiz))
-      ]),
+      drawer: const DrawerBar(),
+      appBar: AppBar(title: const Text('Ghi chú')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                    title: const Text('AlertDialog Title'),
+                    content: Container(
+                        child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                      ),
+                    )),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          print(_controller.text);
+                          Navigator.pop(context, 'Cancel');
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          NoteModel()
+                              .addNote(_controller.text, "Nội dung", false);
+                          Navigator.pop(context, 'OK');
+                        },
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ));
+        },
         child: const Icon(Icons.add),
       ),
       body: Container(
           margin: const EdgeInsets.all(0),
           child: Column(
             children: [
-              Column(
-                // crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10.0, top: 12.0),
-                    child: Row(
-                      children: const [
-                        Text(
-                          'Ghi chú',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 2.0),
-                          child: Text(
-                            '(2)',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        )
-                      ],
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0, top: 18.0),
+                child: Row(
+                  children: [
+                    const Text(
+                      'Ghi chú',
+                      style:
+                          TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                     ),
-                  )
-                ],
+                    Padding(
+                      padding: EdgeInsets.only(left: 2.0),
+                      child: Text(
+                        '(${notes.length})',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    )
+                  ],
+                ),
               ),
               Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection("notes")
-                          .snapshots(),
-                      builder: (context, AsyncSnapshot snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        }
-                        if (!snapshot.hasData) {
-                          return const Center(
-                              child: Text('Không có ghi chú nào'));
-                        } else {
-                          final notes = snapshot.data!.docs;
+                  child: ListView.builder(
+                      padding: const EdgeInsets.all(8),
+                      itemCount: notes.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final createdAt = DateTime.fromMillisecondsSinceEpoch(
+                            notes[index]['createdAt'].millisecondsSinceEpoch);
+                        final createdAtFormatted =
+                            DateFormat('dd/MM/yyyy').format(createdAt);
 
-                          return ListView.builder(
-                              padding: const EdgeInsets.all(8),
-                              itemCount: snapshot.data!.docs.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final createdAt =
-                                    DateTime.fromMillisecondsSinceEpoch(
-                                        notes[index]['createdAt']
-                                            .millisecondsSinceEpoch);
-                                final createdAtFormatted =
-                                    DateFormat('dd/MM/yyyy').format(createdAt);
-
-                                return Card(
-                                  child: InkWell(
-                                    onTap: () {
-                                      // Chuyển sang trang chi tiết khi click vào card
-                                      // Navigator.push(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //     builder: (context) =>
-                                      //         NoteDetailScreen(notes[index]),
-                                      //   ),
-                                      // );
-                                    },
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ListTile(
-                                          title: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 2.0, bottom: 4.0),
-                                              child: Text(
-                                                '${notes[index]['title']}',
-                                                style: const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.w500),
-                                              )),
-                                          subtitle: Text(
-                                            '${notes[index]['content']}',
-                                            maxLines: 4,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 16, vertical: 8),
-                                          child: Text(
-                                            '${createdAtFormatted}',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w300),
-                                          ),
-                                        ),
-                                      ],
+                        return Card(
+                          child: Stack(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => NoteDetailScreen(
+                                        note: NoteModel.fromDoc(notes[index]),
+                                      ),
                                     ),
-                                  ),
-                                );
-                              });
-                        }
+                                  );
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ListTile(
+                                      title: Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 2.0,
+                                          bottom: 4.0,
+                                        ),
+                                        child: Text(
+                                          '${notes[index]['title']}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        '${notes[index]['content']}',
+                                        maxLines: 4,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
+                                      child: Text(
+                                        createdAtFormatted,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w300,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Positioned(
+                                top: 5,
+                                right: 5,
+                                child: PopupMenuButton(
+                                  itemBuilder: (BuildContext context) =>
+                                      <PopupMenuEntry>[
+                                    PopupMenuItem(
+                                      value: 1,
+                                      child:
+                                          Text('Chuyển ghi chú vào thùng rác'),
+                                      onTap: () {
+                                        NoteModel()
+                                            .moveToTrash(notes[index].id);
+                                      },
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 2,
+                                      child: Text('Truy cập vào ghi chú'),
+                                    ),
+                                  ],
+                                  onSelected: (result) {
+                                    // ...
+                                  },
+                                  icon: const Icon(Icons.more_vert),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       })),
             ],
           )),
+    );
+  }
+
+  static Route<Object?> _dialogBuilder(
+      BuildContext context, Object? arguments) {
+    return DialogRoute<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Tạo ghi chú mới'),
+          content: const Text(
+              'Bạn có muốn tạo một ghi chú mới với tiêu đề là "Tiêu đề" và nội dung là "Nội dung" hay không.'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Không'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Tạo'),
+              onPressed: () {
+                NoteModel().addNote("Tiêu đề", "Nội dung", false);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
