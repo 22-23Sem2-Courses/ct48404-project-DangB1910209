@@ -10,7 +10,7 @@ class ImageWithText extends StatelessWidget {
       children: [
         Image.asset(
           'assets/background_home.jpg',
-          height: MediaQuery.of(context).size.width * (1 / 2),
+          height: MediaQuery.of(context).size.width * (3 / 7),
           width: MediaQuery.of(context).size.width,
           fit: BoxFit.cover,
         ),

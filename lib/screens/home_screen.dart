@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:my_note/components/drawer_bar.dart';
 import 'package:my_note/screens/note_detail_screen.dart';
 import 'package:my_note/widgets/backgroud_home.dart';
+import 'package:my_note/models/note_model.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
@@ -15,7 +16,7 @@ class MyHomePage extends StatelessWidget {
         // The title text which will be shown on the action bar
         title: const Text('Trang chủ'),
       ),
-      drawer: const DrawerBar(),
+      drawer:  DrawerBar(),
       body: Column(
         children: <Widget>[
           const ImageWithText(),
@@ -34,7 +35,8 @@ class MyHomePage extends StatelessWidget {
             height: 200.0,
             child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collectionGroup('notes')
+                    .collection('notes')
+                    .orderBy('createdAt', descending: true)
                     .snapshots(),
                 builder: (context, AsyncSnapshot snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -61,7 +63,8 @@ class MyHomePage extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => NoteDetailPage(id: '1'),
+                                  builder: (context) => NoteDetailScreen(
+                                      note: NoteModel.fromDoc(notes[index])),
                                 ),
                               );
                             },

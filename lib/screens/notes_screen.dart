@@ -13,17 +13,6 @@ class NotePage extends StatefulWidget {
 }
 
 class _NotePageState extends State<NotePage> {
-  final List<Note> notes = [
-    Note(
-      id: 'p1',
-      notebook: "1",
-      title: 'Beginning Flutter With Dart',
-      content:
-          'You can learnaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa Flutter as well Dart. You can learn Flutter as well Dart.You can learn Flutter as well Dart.',
-      createdAt: '30/3/2023',
-      updatedAt: '30/3/2023',
-    ),
-  ];
   @override
   Widget build(BuildContext context) {
     bool isSortExpanded = false;
@@ -60,7 +49,7 @@ class _NotePageState extends State<NotePage> {
     }
 
     return Scaffold(
-      drawer: const DrawerBar(),
+      drawer: DrawerBar(),
       appBar: AppBar(title: const Text('Ghi chú'), actions: [
         IconButton(
             onPressed: () {
@@ -115,6 +104,7 @@ class _NotePageState extends State<NotePage> {
                               child: Text('Không có ghi chú nào'));
                         } else {
                           final notes = snapshot.data!.docs;
+
                           return ListView.builder(
                               padding: const EdgeInsets.all(8),
                               itemCount: snapshot.data!.docs.length,
@@ -125,17 +115,18 @@ class _NotePageState extends State<NotePage> {
                                             .millisecondsSinceEpoch);
                                 final createdAtFormatted =
                                     DateFormat('dd/MM/yyyy').format(createdAt);
+
                                 return Card(
                                   child: InkWell(
                                     onTap: () {
                                       // Chuyển sang trang chi tiết khi click vào card
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              NoteDetailPage(id: '1'),
-                                        ),
-                                      );
+                                      // Navigator.push(
+                                      //   context,
+                                      //   MaterialPageRoute(
+                                      //     builder: (context) =>
+                                      //         NoteDetailScreen(notes[index]),
+                                      //   ),
+                                      // );
                                     },
                                     child: Column(
                                       crossAxisAlignment:
@@ -148,7 +139,6 @@ class _NotePageState extends State<NotePage> {
                                               child: Text(
                                                 '${notes[index]['title']}',
                                                 style: const TextStyle(
-                                                    fontSize: 18,
                                                     fontWeight:
                                                         FontWeight.w500),
                                               )),
@@ -174,8 +164,6 @@ class _NotePageState extends State<NotePage> {
                                 );
                               });
                         }
-
-                        return Text('No data');
                       })),
             ],
           )),

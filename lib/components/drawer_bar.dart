@@ -1,9 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_note/screens/home_screen.dart';
+import 'package:my_note/services/auth.dart';
 import '../screens/notes_screen.dart';
 
 class DrawerBar extends StatelessWidget {
-  const DrawerBar({Key? key}) : super(key: key);
+  DrawerBar({Key? key}) : super(key: key);
+
+  final User? user = Auth().currentUser;
+
+  Future<>
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -11,7 +18,7 @@ class DrawerBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           SizedBox(
-            height: 80.0,
+            height: 140.0,
             child: DrawerHeader(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -57,6 +64,13 @@ class DrawerBar extends StatelessWidget {
               Icons.delete,
             ),
             title: const Text('Thùng rác'),
+            onTap: () => print('on tap'),
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.logout,
+            ),
+            title: const Text('Đăng xuất'),
             onTap: () => print('on tap'),
           ),
         ],

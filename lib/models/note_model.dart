@@ -1,16 +1,39 @@
-class Note {
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class NoteModel {
   String? id;
-  String? notebook;
+  String? userId;
   String? title;
   String? content;
-  String? createdAt;
-  String? updatedAt;
-  Note({
-    required this.id,
-    required this.content,
-    required this.title,
-    required this.notebook,
-    required this.createdAt,
-    required this.updatedAt,
+  Timestamp? createdAt;
+  bool important;
+
+  NoteModel({
+    this.id,
+    this.content,
+    this.title,
+    this.createdAt,
+    this.userId,
+    required this.important,
   });
+
+  factory NoteModel.fromDoc(DocumentSnapshot noteDoc) {
+    return NoteModel(
+      id: noteDoc.id,
+      title: noteDoc['title'],
+      content: noteDoc['content'],
+      important: noteDoc['important'],
+      createdAt: noteDoc['createdAt'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'content': content,
+      'important': important,
+      'createdAt': createdAt,
+    };
+  }
 }
