@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:my_note/widgets/list_note.dart';
+import 'package:my_note/widgets/quill.dart';
+import 'package:my_note/widgets/title_note.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:my_note/components/drawer_bar.dart';
@@ -11,88 +15,35 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notes = context.select((NoteModel model) => model.notes);
+    List<DocumentSnapshot<Object?>> notesRecent = context
+        .watch<NoteModel>()
+        .notes
+        .where((note) => note['isDelete'] == false)
+        .toList();
+    notesRecent.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
+    final notesImportant = context
+        .watch<NoteModel>()
+        .notes
+        .where((note) => note['important'] == true)
+        .toList();
+    notesImportant.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Trang chủ'),
-      ),
-      drawer: DrawerBar(),
-      body: Column(
-        children: <Widget>[
-          const ImageWithText(),
-          const Padding(
-            padding: EdgeInsets.only(left: 8.0, top: 16.0, bottom: 8.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'GHI CHÚ GẦN ĐÂY',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-            ),
+        appBar: AppBar(
+          title: const Text('Trang chủ'),
+        ),
+        drawer: const DrawerBar(),
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              const ImageWithText(),
+              if (notesRecent.isNotEmpty)
+                const TitleNotesWidget(label: 'GẦN ĐÂY'),
+              ListNotesWidget(notes: notesRecent),
+              if (notesImportant.isNotEmpty)
+                const TitleNotesWidget(label: 'QUAN TRỌNG'),
+              ListNotesWidget(notes: notesImportant),
+            ],
           ),
-          Container(
-            margin: const EdgeInsets.only(left: 8.0),
-            height: 200.0,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: notes.length,
-              itemBuilder: (context, index) {
-                final createdAt = DateTime.fromMillisecondsSinceEpoch(
-                    notes[index]['createdAt'].millisecondsSinceEpoch);
-                final createdAtFormatted =
-                    DateFormat('dd/MM/yyyy').format(createdAt);
-                return Container(
-                  margin: const EdgeInsets.only(right: 2.0),
-                  width: 160.0,
-                  child: Card(
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NoteDetailScreen(
-                                note: NoteModel.fromDoc(notes[index])),
-                          ),
-                        );
-                      },
-                      child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${notes[index]['title']}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Expanded(
-                                child: Text(
-                                  '${notes[index]['content']}',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 5,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                createdAtFormatted,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          )),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }

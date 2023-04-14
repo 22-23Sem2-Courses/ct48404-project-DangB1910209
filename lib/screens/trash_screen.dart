@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:my_note/components/drawer_bar.dart';
 import 'package:my_note/models/note_model.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 class TrashPage extends StatelessWidget {
   @override

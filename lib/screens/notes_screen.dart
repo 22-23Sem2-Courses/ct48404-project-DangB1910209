@@ -12,6 +12,7 @@ class NotePage extends StatefulWidget {
 }
 
 class _NotePageState extends State<NotePage> {
+  TextEditingController _controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final notes = context
@@ -20,7 +21,7 @@ class _NotePageState extends State<NotePage> {
         .where((note) => note['isDelete'] == false)
         .toList();
     notes.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
-    TextEditingController _controller = TextEditingController();
+
     return Scaffold(
       drawer: const DrawerBar(),
       appBar: AppBar(title: const Text('Ghi chú')),
@@ -29,12 +30,12 @@ class _NotePageState extends State<NotePage> {
           showDialog<String>(
               context: context,
               builder: (BuildContext context) => AlertDialog(
-                    title: const Text('AlertDialog Title'),
+                    title: const Text('Tạo ghi chú mới'),
                     content: Container(
                         child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'Tiêu đề',
                       ),
                     )),
                     actions: <Widget>[
@@ -43,15 +44,19 @@ class _NotePageState extends State<NotePage> {
                           print(_controller.text);
                           Navigator.pop(context, 'Cancel');
                         },
-                        child: const Text('Cancel'),
+                        child: const Text('Hủy'),
                       ),
                       TextButton(
                         onPressed: () {
-                          NoteModel()
-                              .addNote(_controller.text, "Nội dung", false);
-                          Navigator.pop(context, 'OK');
+                          if (_controller.text.isNotEmpty) {
+                            NoteModel()
+                                .addNote(_controller.text, "Nội dung", false);
+                            Navigator.pop(context, 'OK');
+                          }
                         },
-                        child: const Text('OK'),
+                        child: const Text(
+                          'Thêm',
+                        ),
                       ),
                     ],
                   ));

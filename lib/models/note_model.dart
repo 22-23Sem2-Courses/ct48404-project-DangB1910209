@@ -60,13 +60,21 @@ class NoteModel extends ChangeNotifier {
     }
   }
 
-  Future<void> updateNote(
-      String id, String title, String content, bool important) async {
+  Future<void> updateNote(String id, String title, String content) async {
     try {
       await _firestore.collection("notes").doc(id).update({
         "title": title,
         "content": content,
         "createdAt": Timestamp.now(),
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> changImportant(String id, bool important) async {
+    try {
+      await _firestore.collection("notes").doc(id).update({
         "important": important,
       });
     } catch (e) {
