@@ -54,12 +54,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               setState(() {
                 _important = !_important;
               });
-              widget.note.important = !_important;
-              await NoteModel().changImportant(
-                widget.note.id as String,
-                _important,
-              );
-
               final snackBar = SnackBar(
                 content: Text(_important
                     ? 'Đã đặt ghi chú thành quan trọng'
@@ -73,8 +67,12 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                 ),
               );
               // hiển thị Snackbar
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              // widget.note.reference.update({'important': _important});
+              await NoteModel().changImportant(
+                widget.note.id as String,
+                _important,
+              );
             },
           ),
         ],
@@ -99,21 +97,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   const TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8.0),
-            // Expanded(
-            //   child: TextField(
-            //     controller: _contentController,
-            //     decoration: const InputDecoration(
-            //       hintText: 'Nhập nội dung',
-            //       border: InputBorder.none,
-            //       enabledBorder: InputBorder.none,
-            //     ),
-            //     style: const TextStyle(
-            //       fontSize: 16.0,
-            //     ),
-            //     expands: true,
-            //     maxLines: null,
-            //   ),
-            // ),
             Expanded(
               child: QuillEditor.basic(
                 controller: _controller,
@@ -125,9 +108,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // Lưu các thay đổi vào widget.note và đóng màn hình
-          // widget.note.title = _titleController.text;
-          // widget.note.content = _contentController.text;
           var json = jsonEncode(_controller.document.toDelta().toJson());
           await NoteModel().updateNote(
             widget.note.id as String,
@@ -136,7 +116,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           );
           final snackBar = SnackBar(
             content: Text('Lưu ghi chú thành công'),
-            // thiết lập màu nền cho Snackbar
             action: SnackBarAction(
               label: 'Đóng',
               onPressed: () {
@@ -144,7 +123,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               },
             ),
           );
-          // hiển thị Snackbar
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         },
         child: const Icon(Icons.save),

@@ -82,11 +82,26 @@ class NoteModel extends ChangeNotifier {
     }
   }
 
-  Future<void> moveToTrash(String id) async {
+  Future<void> changeDelete(String id, bool isDelete) async {
     try {
       await _firestore.collection("notes").doc(id).update({
-        "isDelete": true,
+        "isDelete": isDelete,
       });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> clearTrash() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('notes')
+          .where('isDelete', isEqualTo: true)
+          .get();
+      final notes = querySnapshot.docs;
+      for (var note in notes) {
+        await _firestore.collection('notes').doc(note.id).delete();
+      }
     } catch (e) {
       print(e);
     }
