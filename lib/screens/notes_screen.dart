@@ -203,14 +203,7 @@ class _NotePageState extends State<NotePage> {
                                               .showSnackBar(snackBar);
                                         },
                                       ),
-                                      const PopupMenuItem(
-                                        value: 2,
-                                        child: Text('Truy cập vào ghi chú'),
-                                      ),
                                     ],
-                                    onSelected: (result) {
-                                      // ...
-                                    },
                                     icon: const Icon(Icons.more_vert),
                                   ),
                                 ),

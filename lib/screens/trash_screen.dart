@@ -143,6 +143,21 @@ class TrashPage extends StatelessWidget {
                                     .showSnackBar(snackBar);
                               },
                             ),
+                            PopupMenuItem(
+                              child: Text('Xóa vĩnh viễn'),
+                              onTap: () {
+                                NoteModel().deleteNote(note.id);
+                                final snackBar = SnackBar(
+                                  content: const Text('Đã xóa ghi chú'),
+                                  action: SnackBarAction(
+                                    label: 'Đóng',
+                                    onPressed: () {},
+                                  ),
+                                );
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                              },
+                            ),
                           ],
                         ),
                       ),

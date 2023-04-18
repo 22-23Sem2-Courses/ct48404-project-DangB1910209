@@ -87,17 +87,18 @@ class MyHomePage extends StatelessWidget {
               if (notesRecent.isNotEmpty)
                 const TitleNotesWidget(label: 'GẦN ĐÂY'),
               if (notesRecent.isNotEmpty) ListNotesWidget(notes: notesRecent),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Container(
-                  width: double.infinity,
-                  color: Color.fromRGBO(242, 242, 242, 1),
-                  child: const SizedBox(
-                    height: 24,
+              if (notesImportant.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Container(
                     width: double.infinity,
+                    color: Color.fromRGBO(242, 242, 242, 1),
+                    child: const SizedBox(
+                      height: 24,
+                      width: double.infinity,
+                    ),
                   ),
                 ),
-              ),
               if (notesImportant.isNotEmpty)
                 const TitleNotesWidget(label: 'QUAN TRỌNG'),
               if (notesImportant.isNotEmpty)

@@ -111,7 +111,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           var json = jsonEncode(_controller.document.toDelta().toJson());
           await NoteModel().updateNote(
             widget.note.id as String,
-            widget.note.title as String,
+            _titleController.text,
             json,
           );
           final snackBar = SnackBar(
