@@ -2,15 +2,15 @@
 
 Học kỳ 2, Năm học 2022-2023
 
-**MSSV 1** : 
+**MSSV 1** : B1910209
 
-**Họ tên SV 1**:
+**Họ tên SV 1**: Phan Hải Đăng
 
-**MSSV 2**:
+**MSSV 2**: B1910238
 
-**Họ tên SV 2**:
+**Họ tên SV 2**: Tô Quốc Khánh
 
-**Lớp học phần**:
+**Lớp học phần**: Ct484-04
 
-**Tên dự án**:
+**Tên dự án**: Ứng dụng ghi chú
 

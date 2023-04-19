@@ -178,6 +178,6 @@ class TrashPage extends StatelessWidget {
             ))
         ],
       ),
-    );
+    ); 
   }
 }
